@@ -109,6 +109,10 @@ endif
 PHONY := _all
 _all:
 
+# A simple target for testing variables
+PHONY += print-%
+print-%: ; @echo $* = $($*)
+
 # Cancel implicit rules on top Makefile
 $(CURDIR)/Makefile Makefile: ;
 
@@ -244,12 +248,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -pipe -Wmissing-prototypes -Wstrict-prototypes -O2 -fno-tree-vectorize -fomit-frame-pointer -std=gnu89 
-HOSTCXXFLAGS = -pipe -O2 -fno-tree-vectorize
-
-# More Graphite
-HOSTCXXFLAGS += -fgraphite -fgraphite-identity -fivopts -floop-block -floop-interchange -floop-strip-mine -fomit-frame-pointer -ftree-loop-distribution -ftree-loop-linear  
-HOSTCFLAGS += -fgraphite -fgraphite-identity -fivopts -floop-block -floop-interchange -floop-strip-mine -fomit-frame-pointer -ftree-loop-distribution -ftree-loop-linear 
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes $(COMMONFLAGS) \
+	-fomit-frame-pointer -floop-parallelize-all -ftree-parallelize-loops=4
+HOSTCXXFLAGS = $(COMMONFLAGS) -floop-parallelize-all -ftree-parallelize-loops=4
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -349,15 +350,15 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-
-GRAPHITE_FLAGS  = -fgraphite -fgraphite-identity -fivopts -floop-block -floop-interchange -floop-strip-mine -fomit-frame-pointer -ftree-loop-distribution -ftree-loop-linear
-KERNELFLAGS  = -pipe -O2 -munaligned-access -fgcse-lm -fgcse-sm -fsingle-precision-constant -mtune=cortex-a15 -marm -mfpu=neon-vfpv4 -fno-tree-vectorize
-
+KERNELFLAGS     = $(COMMONFLAGS) -mtune=cortex-a15 -mcpu=cortex-a15 \
+		  -marm -mfpu=neon-vfpv4 -mvectorize-with-neon-quad \
+		  -munaligned-access -D__ARM_FEATURE_LPAE=1
+# Bad options: -floop-parallelize-all -ftree-parallelize-loops=4
 CFLAGS_MODULE   =  -fno-pic
 AFLAGS_MODULE   = 
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL  = $(KERNELFLAGS)
-AFLAGS_KERNEL  = $(KERNELFLAGS)
+CFLAGS_KERNEL   = 
+AFLAGS_KERNEL   = 
 CFLAGS_GCOV     = -fprofile-arcs -ftest-coverage
 
 # Use LINUXINCLUDE when you must reference the include/ directory.
@@ -369,16 +370,12 @@ LINUXINCLUDE    := -I$(srctree)/arch/$(hdr-arch)/include \
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
-KBUILD_CFLAGS   := -Wall -DNDEBUG -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -fno-strict-aliasing -fno-common \
-                   -Werror-implicit-function-declaration \
-                   -Wno-format-security \
-                   -Wno-shift-overflow -Wno-tautological-compare \
-				   -fno-tree-vectorize -Wno-array-bounds -fno-inline-functions \
-                   -Wno-sizeof-pointer-memaccess -Wno-misleading-indentation -Wno-duplicate-decl-specifier \
-                   -fno-delete-null-pointer-checks -mno-unaligned-access \
-		   		   -mtune=cortex-a15 -mfpu=neon-vfpv4 \
-				   -std=gnu89
+
+KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+		   -fno-strict-aliasing -fno-common \
+		   -Werror-implicit-function-declaration \
+		   -Wno-format-security \
+		   -fno-delete-null-pointer-checks
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -573,9 +570,26 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS   += $(call cc-disable-warning,array-bounds)
 
+# Define common optimization flags
+COMMONFLAGS	+= -pipe -DNDEBUG -fdiagnostics-color
+
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+COMMONFLAGS	+= -Os -finline-functions -funswitch-loops -fpredictive-commoning \
+	-fgcse-after-reload -ftree-loop-vectorize -ftree-loop-distribute-patterns \
+	-ftree-slp-vectorize -fvect-cost-model -ftree-partial-pre -fipa-cp-clone
+else
+COMMONFLAGS += -O3 -falign-functions=1 -falign-jumps=1 -falign-loops=1 -falign-labels=1
 endif
+
+COMMONFLAGS	+= -ffast-math -fsingle-precision-constant -ftree-vectorize \
+	-fgcse-lm -fgcse-sm -fgcse-las -fsched-spec-load -floop-nest-optimize \
+	-fgraphite -fgraphite-identity -ftree-loop-linear -floop-interchange \
+	-floop-strip-mine -floop-block -floop-flatten
+
+KBUILD_CFLAGS	+= $(KERNELFLAGS)
+
+# Tell gcc to never replace conditional load with a non-conditional one
+KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 
 # Disable all maybe-uninitialized warnings
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
