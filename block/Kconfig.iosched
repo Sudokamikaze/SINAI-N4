@@ -102,6 +102,10 @@ config IOSCHED_FIOPS
           IOPS equally among all processes in the system. It's mainly for
           Flash based storage.
 
+	config IOSCHED_MAPLE
+		tristate "Maple I/O scheduler"
+		default y
+
 choice
 	prompt "Default I/O scheduler"
 	default DEFAULT_CFQ
@@ -121,10 +125,6 @@ choice
 		  Dispatching is done in a RR manner when the dispatch quantum
 		  for each queue is defined according to queue priority.
 		  Most suitable for mobile devices.
-
-	config IOSCHED_MAPLE
-		tristate "Maple I/O scheduler"
-		default y
 
 	config DEFAULT_CFQ
 		bool "CFQ" if IOSCHED_CFQ=y
