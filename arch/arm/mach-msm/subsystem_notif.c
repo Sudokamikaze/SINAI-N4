@@ -162,7 +162,6 @@ int subsys_notif_queue_notification(void *subsys_handle,
 	ret = srcu_notifier_call_chain(
 		&subsys->subsys_notif_rcvr_list, notif_type,
 		(void *)subsys);
-
 	return ret;
 }
 EXPORT_SYMBOL(subsys_notif_queue_notification);
