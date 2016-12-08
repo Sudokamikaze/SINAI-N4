@@ -1425,6 +1425,8 @@ static irqreturn_t msm_hsic_wakeup_irq(int irq, void *data)
 		pm_runtime_get(mehci->dev);
 	}
 
+	pm_relax(mehci->dev);
+
 	return IRQ_HANDLED;
 }
 
