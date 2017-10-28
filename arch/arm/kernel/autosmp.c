@@ -58,7 +58,7 @@ static struct asmp_param_struct {
 	.cpufreq_up = 90,
 	.cpufreq_down = 60,
 	.cycle_up = 1,
-	.cycle_down = 1,
+	.cycle_down = 2,
 };
 
 static unsigned int cycle = 0, delay0 = 0;
