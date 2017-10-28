@@ -681,6 +681,13 @@ config TOUCH_WAKE
 	help
 	  Say Y here to enable Touch Wake
 
+config TOUCH_WAKE_VIBRATION
+	bool "Touch Wake vibration toggle"
+	depends on TOUCH_WAKE
+	default n
+	help
+	  Say Y here to enable vibration when touchwoking
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
