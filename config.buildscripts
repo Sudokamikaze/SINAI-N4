@@ -2,7 +2,7 @@
 KERNELNAME=SINAI-N4
 DEVICE=mako
 PATCH=True
-BRANCH=sudokamikaze_kernels
+BRANCH=SINAI-N4
 
 [BUILD]
 TOOLCHAIN_PATH=/home/haze/storage/toolchains/7.3_a15/bin/arm-eabi-
