@@ -1,0 +1,33 @@
+From ec16fd0ef05b1cfd06a61cd40bca14c9b7b06350 Mon Sep 17 00:00:00 2001
+From: Artem Borisov <dedsa2002@gmail.com>
+Date: Tue, 7 Nov 2017 19:09:49 +0300
+Subject: [PATCH] mako: defconfig: Use 64-bit binder API
+
+IPC_32BIT originally was intended to be used on 4.4 and older userspaces,
+because they didn't support new API and 64-bit pointers, but then it was
+forced on 32-bit platforms because ARM didn't have essential 64-bit get_user() calls.
+The main limitation of this option is that it is incompatible with new API,
+so kernel and userspace should have same binder version to work properly.
+Necessary calls were later introduced in commit "ARM: 8091/2: add get_user() support for 8 byte types"
+and now AOSP and mainline are going towards removing old 32-bit binder API support.
+64-bit binder is 100% compatible with 32-bit kernel and userspace,
+so there is no reason for us to keep using the old solution anymore.
+
+Change-Id: I91ce91a1a17ceb7110184657663e957bd8793d3f
+---
+ arch/arm/configs/sudokamikaze_mako_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/configs/sudokamikaze_mako_defconfig b/arch/arm/configs/sudokamikaze_mako_defconfig
+index 2677a2878c8..4becd869232 100644
+--- a/arch/arm/configs/sudokamikaze_mako_defconfig
++++ b/arch/arm/configs/sudokamikaze_mako_defconfig
+@@ -492,7 +492,7 @@ CONFIG_RTC_DRV_PM8XXX=y
+ CONFIG_STAGING=y
+ CONFIG_ANDROID=y
+ CONFIG_ANDROID_BINDER_IPC=y
+-CONFIG_ANDROID_BINDER_IPC_32BIT=y
++# CONFIG_ANDROID_BINDER_IPC_32BIT is not set
+ CONFIG_ASHMEM=y
+ CONFIG_ANDROID_RAM_CONSOLE=y
+ CONFIG_ANDROID_TIMED_GPIO=y

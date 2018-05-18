@@ -1,0 +1,41 @@
+From dbe44d4fbfa3bc4113f40d2f24f2114313064d17 Mon Sep 17 00:00:00 2001
+From: John Stultz <john.stultz@linaro.org>
+Date: Fri, 21 Feb 2014 14:40:27 -0800
+Subject: [PATCH] staging: binder: Improve Kconfig entry for
+ ANDROID_BINDER_IPC_32BIT
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add a more clear explanation of the option in the prompt, and
+make the config depend on ANDROID_BINDER_IPC being selected.
+
+Also sets the default to y, which matches AOSP.
+
+Change-Id: Ib85275f415a3a10b3b40e0f847cb43fce69c203b
+Cc: Colin Cross <ccross@android.com>
+Cc: Arve Hjønnevåg <arve@android.com>
+Cc: Serban Constantinescu <serban.constantinescu@arm.com>
+Cc: Android Kernel Team <kernel-team@android.com>
+Signed-off-by: John Stultz <john.stultz@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/staging/android/Kconfig | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/staging/android/Kconfig b/drivers/staging/android/Kconfig
+index bae2b486ad6..0509c2af24e 100644
+--- a/drivers/staging/android/Kconfig
++++ b/drivers/staging/android/Kconfig
+@@ -13,8 +13,9 @@ config ANDROID_BINDER_IPC
+ 	default n
+ 
+ config ANDROID_BINDER_IPC_32BIT
+-	bool "Use old 32-bit binder api"
+-	depends on !64BIT
++	bool "Use old (Android 4.4 and earlier) 32-bit binder API"
++	depends on !64BIT && ANDROID_BINDER_IPC
++	default y
+ 	---help---
+ 	  Enable to support an old 32-bit Android user-space. Breaks the new
+ 	  Android user-space.

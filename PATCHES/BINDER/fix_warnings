@@ -1,0 +1,48 @@
+From 127daac9ec4d327e5afd4ebdb9f8319d6da8e41f Mon Sep 17 00:00:00 2001
+From: Martijn Coenen <maco@android.com>
+Date: Wed, 28 Jun 2017 12:02:45 -0700
+Subject: [PATCH] ANDROID: binder: fix compilation warnings.
+
+When using the 64-bit binder interface on 32-bit
+kernels. These are safe to cast, because they are
+buffers we have previously successfully called
+copy_from_user() on.
+
+Change-Id: Ifa4ef2f99b28202d3d1bd1417e441266a2609cec
+Signed-off-by: Martijn Coenen <maco@android.com>
+---
+ drivers/staging/android/binder.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/staging/android/binder.c b/drivers/staging/android/binder.c
+index f365667aa76..b14aaa4a7bd 100644
+--- a/drivers/staging/android/binder.c
++++ b/drivers/staging/android/binder.c
+@@ -1626,7 +1626,8 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
+ 				       debug_id, (u64)fda->num_fds);
+ 				continue;
+ 			}
+-			fd_array = (u32 *)(parent_buffer + fda->parent_offset);
++			fd_array = (u32 *)(uintptr_t)
++				(parent_buffer + fda->parent_offset);
+ 			for (fd_index = 0; fd_index < fda->num_fds; fd_index++)
+ 				task_close_fd(proc, fd_array[fd_index]);
+ 		} break;
+@@ -1830,7 +1831,7 @@ static int binder_translate_fd_array(struct binder_fd_array_object *fda,
+ 	 * back to the kernel address space to access it
+ 	 */
+ 	parent_buffer = parent->buffer - target_proc->user_buffer_offset;
+-	fd_array = (u32 *)(parent_buffer + fda->parent_offset);
++	fd_array = (u32 *)(uintptr_t)(parent_buffer + fda->parent_offset);
+ 	if (!IS_ALIGNED((unsigned long)fd_array, sizeof(u32))) {
+ 		binder_user_error("%d:%d parent offset not aligned correctly.\n",
+ 				  proc->pid, thread->pid);
+@@ -1896,7 +1897,7 @@ static int binder_fixup_parent(struct binder_transaction *t,
+ 				  proc->pid, thread->pid);
+ 		return -EINVAL;
+ 	}
+-	parent_buffer = (u8 *)(parent->buffer -
++	parent_buffer = (u8 *)(uintptr_t)(parent->buffer -
+ 			       target_proc->user_buffer_offset);
+ 	*(binder_uintptr_t *)(parent_buffer + bp->parent_offset) = bp->buffer;
+ 

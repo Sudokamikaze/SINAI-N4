@@ -1,0 +1,42 @@
+From 8110f9c83d4863bdf0941e61b87795cd6d27b321 Mon Sep 17 00:00:00 2001
+From: Lisa Du <cldu@marvell.com>
+Date: Wed, 17 Feb 2016 09:32:52 +0800
+Subject: [PATCH] UPSTREAM: drivers: android: correct the size of struct
+ binder_uintptr_t for BC_DEAD_BINDER_DONE
+
+There's one point was missed in the patch commit da49889deb34 ("staging:
+binder: Support concurrent 32 bit and 64 bit processes."). When configure
+BINDER_IPC_32BIT, the size of binder_uintptr_t was 32bits, but size of
+void * is 64bit on 64bit system. Correct it here.
+
+Signed-off-by: Lisa Du <cldu@marvell.com>
+Signed-off-by: Nicolas Boichat <drinkcat@chromium.org>
+Fixes: da49889deb34 ("staging: binder: Support concurrent 32 bit and 64 bit processes.")
+Cc: <stable@vger.kernel.org>
+Acked-by: Olof Johansson <olof@lixom.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+(cherry picked from commit 7a64cd887fdb97f074c3fda03bee0bfb9faceac3)
+[drinkcat: upstream moved drivers/staging/android to drivers/android]
+
+BUG=b:26833439
+TEST=See b:26833439 comment #22
+
+Signed-off-by: Nicolas Boichat <drinkcat@google.com>
+Change-Id: I4a3fd73fea1cbd5c8ea0a9f33c17ef25006ad0dd
+---
+ drivers/staging/android/binder.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/staging/android/binder.c b/drivers/staging/android/binder.c
+index 1c0ff9bf0d7..f365667aa76 100644
+--- a/drivers/staging/android/binder.c
++++ b/drivers/staging/android/binder.c
+@@ -2661,7 +2661,7 @@ static int binder_thread_write(struct binder_proc *proc,
+ 			if (get_user(cookie, (binder_uintptr_t __user *)ptr))
+ 				return -EFAULT;
+ 
+-			ptr += sizeof(void *);
++			ptr += sizeof(cookie);
+ 			list_for_each_entry(w, &proc->delivered_death, entry) {
+ 				struct binder_ref_death *tmp_death = container_of(w, struct binder_ref_death, work);
+ 				if (tmp_death->cookie == cookie) {
