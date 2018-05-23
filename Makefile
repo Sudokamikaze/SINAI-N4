@@ -375,7 +375,10 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks
+		   -fno-delete-null-pointer-checks \
+		   -Wno-shift-overflow -Wno-tautological-compare \
+           -Wno-array-bounds -fno-inline-functions \
+		   -Wno-sizeof-pointer-memaccess -Wno-misleading-indentation -Wno-duplicate-decl-specifier 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -574,18 +577,14 @@ KBUILD_CFLAGS   += $(call cc-disable-warning,array-bounds)
 COMMONFLAGS	+= -pipe -DNDEBUG -fdiagnostics-color
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-COMMONFLAGS	+= -Os -finline-functions -funswitch-loops -fpredictive-commoning \
-	-fgcse-after-reload -ftree-loop-vectorize -ftree-loop-distribute-patterns \
-	-ftree-slp-vectorize -fvect-cost-model -ftree-partial-pre -fipa-cp-clone
+COMMONFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
 COMMONFLAGS += -O3 -falign-functions=1 -falign-jumps=1 -falign-loops=1 -falign-labels=1
 endif
 
-COMMONFLAGS	+= -ffast-math -fsingle-precision-constant -ftree-vectorize \
-	-fgcse-lm -fgcse-sm -fgcse-las -fsched-spec-load -floop-nest-optimize \
-	-fgraphite -fgraphite-identity -ftree-loop-linear -floop-interchange \
-	-floop-strip-mine -floop-block -floop-flatten
-
+COMMONFLAGS	+= -ffast-math -fsingle-precision-constant -ftree-vectorize   \
+  	-fgcse-lm -fgcse-sm 
+	  
 KBUILD_CFLAGS	+= $(KERNELFLAGS)
 
 # Tell gcc to never replace conditional load with a non-conditional one
