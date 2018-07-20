@@ -5,5 +5,5 @@ PATCH=True
 BRANCH=SINAI-N4
 
 [BUILD]
-TOOLCHAIN_PATH=/home/haze/storage/toolchains/7.3_a15/bin/arm-eabi-
+TOOLCHAIN_PATH=/home/manacom/storage/toolchains/7.3_a15/bin/arm-eabi-
 DEFCONFIG=sudokamikaze_mako_defconfig
