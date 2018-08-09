@@ -2,7 +2,7 @@
 KERNELNAME=SINAI-N4
 DEVICE=mako
 PATCH=True
-BRANCH=SINAI-N4
+BRANCH=mako
 
 [BUILD]
 TOOLCHAIN_PATH=/home/manacom/storage/toolchains/7.3_a15/bin/arm-eabi-
