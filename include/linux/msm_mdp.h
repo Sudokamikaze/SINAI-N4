@@ -111,6 +111,7 @@ enum {
 	MDP_Y_CBCR_H1V1,  /* Y and CbCr, pseduo planer w/ Cb is in MSB */
 	MDP_YCRCB_H1V1,   /* YCrCb interleave */
 	MDP_YCBCR_H1V1,   /* YCbCr interleave */
+	MDP_YCBYCR_H2V1,  /* YCbYCr interleave */
 	MDP_BGR_565,      /* BGR 565 planer */
 	MDP_IMGTYPE_LIMIT,
 	MDP_RGB_BORDERFILL,	/* border fill pipe */
